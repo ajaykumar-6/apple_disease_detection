@@ -1,0 +1,263 @@
+/* ===========================
+   GLOBAL STYLES
+=========================== */
+body {
+    background: #f6fff8;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #1b4332;
+}
+
+h2, h3, h4, h5 {
+    font-weight: 600;
+}
+
+.container {
+    max-width: 1100px;
+}
+
+/* ===========================
+   HEADER + NAVBAR
+=========================== */
+.navbar {
+    background-color: #2d6a4f !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    color: #fff !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+footer {
+    background: #f4f4f4;
+    padding: 15px;
+    font-size: 14px;
+    text-align: center;
+    color: #555;
+}
+
+/* ===========================
+   UPLOAD SECTION
+=========================== */
+.upload-label {
+    padding: 12px 30px;
+    background: #52b788;
+    color: #fff;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.upload-label:hover {
+    background: #1b4332;
+    color: #fff;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* ===========================
+   IMAGE PREVIEW + SECTION
+=========================== */
+.image-section {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.img-preview {
+    width: 280px;
+    height: 280px;
+    border: 3px dashed #74c69d;
+    border-radius: 12px;
+    margin: 15px auto;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   BUTTONS + LOADER
+=========================== */
+#btn-predict {
+    padding: 12px 35px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#btn-predict:hover {
+    background: #1b4332;
+}
+
+.loader {
+    border: 6px solid #eee;
+    border-top: 6px solid #2d6a4f;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===========================
+   RESULT CARD
+=========================== */
+#result {
+    padding: 15px;
+    margin-top: 20px;
+    display: none;
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-body h4 {
+    margin-top: 10px;
+    color: #2d6a4f;
+}
+
+ul {
+    text-align: left;
+    list-style-type: square;
+    padding-left: 25px;
+}
+
+/* ===========================
+   EXAMPLE IMAGE
+=========================== */
+.example-img {
+    width: 260px;
+    height: 260px;
+    border-radius: 10px;
+    border: 4px solid #d8f3dc;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+=========================== */
+/* ===========================
+   OPTIMIZED RESPONSIVE DESIGN
+=========================== */
+
+/* 📱 Mobile Phones (Default / Smallest) */
+@media (max-width: 575.98px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.25rem !important; }
+
+    /* Make images fluid */
+    .img-preview, .example-img {
+        width: 100% !important; /* Take full width of parent */
+        max-width: 280px;      /* But don't get too giant */
+        height: auto;          /* Maintain aspect ratio */
+        aspect-ratio: 1 / 1;   /* Keep it square */
+    }
+
+    .upload-label, #btn-predict {
+        width: 100%;           /* Full width buttons are easier to tap with thumbs */
+        display: block;
+        margin: 10px 0;
+    }
+
+    .card-body {
+        padding: 1rem;         /* More room for text */
+    }
+
+    ul.info-list {
+        padding-left: 20px;
+        font-size: 0.95rem;
+    }
+}
+
+/* 📱 Tablets (Portrait) */
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .img-preview, .example-img {
+        width: 250px;
+        height: 250px;
+    }
+
+    #btn-predict {
+        width: auto;
+        min-width: 200px;
+    }
+}
+
+/* 💻 Laptops & Desktops */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+
+    .img-preview {
+        width: 320px;
+        height: 320px;
+    }
+
+    .example-img {
+        width: 300px;
+        height: 300px;
+    }
+}
+/* ===========================
+    THEME VARIABLES
+=========================== */
+:root {
+    /* Light Mode Colors */
+    --bg-color: #f8fff9;
+    --card-bg: #ffffff;
+    --text-color: #1b4332;
+    --nav-bg: linear-gradient(90deg, #1b4332 0%, #2d6a4f 100%);
+    --border-color: #e9ecef;
+    --muted-text: #6c757d;
+}
+
+[data-theme="dark"] {
+    /* Dark Mode Colors */
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --nav-bg: #1b4332;
+    --border-color: #333333;
+    --muted-text: #b0b0b0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.card, .upload-box, footer {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.text-muted {
+    color: var(--muted-text) !important;
+}
+
+.navbar {
+    background: var(--nav-bg) !important;
+}
