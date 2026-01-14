@@ -12,10 +12,10 @@ itsdangerous==2.1.2
 gunicorn==20.1.0
 
 # ==============================
-# Deep Learning (SAFE COMBO)
+# Deep Learning (LEGACY SAFE)
 # ==============================
-tensorflow-cpu==2.13.0
-numpy==1.24.3
+tensorflow-cpu==2.10.1
+numpy==1.23.5
 h5py==3.8.0
 
 # ==============================
