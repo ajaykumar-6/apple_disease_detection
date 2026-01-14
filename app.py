@@ -3,7 +3,7 @@ import os
 import numpy as np
 from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from keras.preprocessing import image
 
 # ============================
@@ -16,7 +16,7 @@ MODEL_PATH = 'apple_disease_model.h5'
 
 # Load the trained model
 print(" ** Loading Model **")
-model = load_model(MODEL_PATH)
+model = load_model(MODEL_PATH, compile=False)
 print(" ** Model Loaded Successfully **")
 
 # ============================
