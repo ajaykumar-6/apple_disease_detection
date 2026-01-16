@@ -45,8 +45,9 @@ This project uses a **CNN model (EfficientNet-B3)** trained on an Apple Disease 
 
 
 
-PROJECT STRUCTURE
+## 📁 Project Structure
 
+```text
 apple_disease_detection/
 │
 ├── app.py                  # Flask backend
@@ -57,8 +58,7 @@ apple_disease_detection/
 ├── static/                 # CSS, JS, images
 ├── uploads/                # Uploaded images (runtime)
 ├── README.md               # Documentation
-└── .gitattributes          # Git LFS config
-
+└── .gitattributes          # Git LFS configuration
 
 ## Model File & Git LFS
 
