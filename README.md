@@ -60,10 +60,12 @@ apple_disease_detection/
 └── .gitattributes          # Git LFS config
 
 
-Model File & Git LFS
+## Model File & Git LFS
 
 git lfs install
+
 git clone <your-github-repo-url>
+
 cd apple_disease_detection
 
 
