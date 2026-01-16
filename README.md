@@ -60,6 +60,7 @@ apple_disease_detection/
 ├── README.md               # Documentation
 └── .gitattributes          # Git LFS configuration
 
+```
 ## Model File & Git LFS
 
 git lfs install
