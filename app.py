@@ -5,6 +5,8 @@ from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
 from tensorflow.keras.models import load_model
 from keras.preprocessing import image
+import tensorflow as tf
+import cv2
 
 # ============================
 # Flask app setup
@@ -64,6 +66,7 @@ translated_info = {
         'match_label': 'मैच (समानता)',
         'analysis_badge': 'विश्लेषण पूरा हुआ',
         'prob_header': '📊 सभी वर्गों की संभावनाएं:',
+        'gradcam_label': '🔍 एआई विश्लेषण मानचित्र (Grad-CAM)',
         'headers': {'prec': 'सावधानियां', 'fert': 'उर्वरक', 'pest': 'कीटनाशक'},
         'data': {
             'black_rot': {
@@ -96,6 +99,7 @@ translated_info = {
         'match_label': 'సరిపోలిక',
         'analysis_badge': 'విశ్లేషణ పూర్తయింది',
         'prob_header': '📊 అన్ని తరగతుల సంభావ్యతలు:',
+        'gradcam_label': '🔍 AI విశ్లేషణ పటం (Grad-CAM)',
         'headers': {'prec': 'జాగ్రత్తలు', 'fert': 'ఎరువులు', 'pest': 'పురుగుమందులు'},
         'data': {
             'black_rot': {
@@ -125,6 +129,71 @@ translated_info = {
         }
     }
 }
+
+# ============================
+# Grad-CAM Function
+# ============================
+def get_gradcam_image(img_path, model, upload_folder, filename):
+    try:
+        img = cv2.imread(img_path)
+        if img is None:
+            return None
+        
+        img_keras = image.load_img(img_path, target_size=(300, 300))
+        x = image.img_to_array(img_keras)
+        x = np.expand_dims(x, axis=0) / 255.0
+
+        last_conv_layer_name = None
+        for layer in reversed(model.layers):
+            try:
+                shape = layer.output_shape
+                if isinstance(shape, list):
+                    shape = shape[0]
+                if len(shape) == 4:
+                    last_conv_layer_name = layer.name
+                    break
+            except Exception:
+                continue
+        
+        if not last_conv_layer_name:
+            last_conv_layer_name = 'top_conv'
+
+        grad_model = tf.keras.models.Model(
+            inputs=[model.inputs],
+            outputs=[model.get_layer(last_conv_layer_name).output, model.output]
+        )
+
+        with tf.GradientTape() as tape:
+            outputs = grad_model(x)
+            last_conv_layer_output = outputs[0]
+            preds = outputs[1]
+            
+            if isinstance(preds, (list, tuple)): preds = preds[0]
+            if isinstance(last_conv_layer_output, (list, tuple)): last_conv_layer_output = last_conv_layer_output[0]
+            
+            pred_index = tf.argmax(preds[0])
+            class_channel = preds[:, pred_index]
+
+        grads = tape.gradient(class_channel, last_conv_layer_output)
+        pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+        last_conv_layer_output = last_conv_layer_output[0]
+        heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+        heatmap = tf.squeeze(heatmap)
+        heatmap = tf.maximum(heatmap, 0) / (tf.math.reduce_max(heatmap) + 1e-10)
+        heatmap = heatmap.numpy()
+
+        heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+        heatmap = np.uint8(255 * heatmap)
+        heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+        superimposed_img = cv2.addWeighted(heatmap, 0.4, img, 0.6, 0)
+
+        gradcam_filename = "gradcam_" + filename
+        gradcam_path = os.path.join(upload_folder, gradcam_filename)
+        cv2.imwrite(gradcam_path, superimposed_img)
+        return gradcam_filename
+    except Exception as e:
+        print("Grad-CAM Error:", str(e))
+        return None
 
 # ============================
 # Prediction Function
@@ -157,7 +226,7 @@ def upload():
         
         f = request.files['file']
         basepath = os.path.dirname(__file__)
-        upload_folder = os.path.join(basepath, 'uploads')
+        upload_folder = os.path.join(basepath, 'static', 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
         
         file_path = os.path.join(upload_folder, secure_filename(f.filename))
@@ -165,6 +234,9 @@ def upload():
 
         # 1. Prediction
         predicted_label, confidence, raw_preds = model_predict(file_path, model)
+        
+        # 1.5 Grad-CAM Generation
+        gradcam_filename = get_gradcam_image(file_path, model, upload_folder, secure_filename(f.filename))
 
         # 2. Localized Content Selection
         if lang in translated_info:
@@ -177,6 +249,7 @@ def upload():
             match_word = t_data['match_label']
             analysis_word = t_data['analysis_badge']
             prob_header = t_data['prob_header']
+            gradcam_label = t_data.get('gradcam_label', '🔍 AI Analysis Map (Grad-CAM)')
             h = t_data['headers']
         else:
             # English Defaults
@@ -188,7 +261,17 @@ def upload():
             match_word = "Match"
             analysis_word = "Analysis Complete"
             prob_header = "📊 All Class Probabilities:"
+            gradcam_label = "🔍 AI Analysis Map (Grad-CAM)"
             h = {'prec': 'Precautions', 'fert': 'Fertilizers', 'pest': 'Pesticides'}
+
+        gradcam_html = ""
+        if gradcam_filename:
+            gradcam_html = f'''
+            <div class="text-center mb-4">
+                <img src="/static/uploads/{gradcam_filename}" class="img-fluid rounded border border-2 shadow-sm" style="max-height: 250px;" alt="Grad-CAM Heatmap">
+                <p class="text-muted small mt-2 fw-bold">{gradcam_label}</p>
+            </div>
+            '''
 
         # 3. Localized Probability List Mapping
         prob_list_html = ""
@@ -214,6 +297,7 @@ def upload():
                 <p class="text-center text-muted mb-0"><b>{confidence}%</b> {match_word}</p>
             </div>
             <div class="card-body p-4">
+                {gradcam_html}
                 <div class="progress mb-4" style="height: 12px; border-radius: 10px;">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: {confidence}%"></div>
                 </div>
