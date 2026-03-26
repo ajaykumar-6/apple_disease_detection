@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["OMP_NUM_THREADS"] = "1"
 import numpy as np
 from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
@@ -18,7 +20,16 @@ MODEL_PATH = 'apple_disease_model.h5'
 
 # Load the trained model
 print(" ** Loading Model **")
-model = load_model(MODEL_PATH, compile=False)
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        print("Loading model...")
+        model = load_model(MODEL_PATH, compile=False)
+        print("Model loaded")
+    return model
+
 print(" ** Model Loaded Successfully **")
 
 # ============================
@@ -233,7 +244,7 @@ def upload():
         f.save(file_path)
 
         # 1. Prediction
-        predicted_label, confidence, raw_preds = model_predict(file_path, model)
+        predicted_label, confidence, raw_preds = model_predict(file_path, get_model())
         
         # 1.5 Grad-CAM Generation
         gradcam_filename = get_gradcam_image(file_path, model, upload_folder, secure_filename(f.filename))
